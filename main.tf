@@ -123,3 +123,59 @@ resource "aws_eks_access_policy_association" "root" {
     type = "cluster"
   }
 }
+
+# IAM User for Developer Access
+resource "aws_iam_user" "bedrock_dev_view" {
+  name = "bedrock-dev-view"
+
+  tags = {
+    Project = "barakat-2025-capstone"
+  }
+}
+
+# Attach ReadOnlyAccess policy for AWS Console
+resource "aws_iam_user_policy_attachment" "bedrock_dev_readonly" {
+  user       = aws_iam_user.bedrock_dev_view.name
+  policy_arn = "arn:aws:iam::aws:policy/ReadOnlyAccess"
+}
+
+# Create custom policy for S3 PutObject
+resource "aws_iam_user_policy" "bedrock_dev_s3_put" {
+  name   = "bedrock-dev-s3-put"
+  user   = aws_iam_user.bedrock_dev_view.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "s3:PutObject",
+          "s3:PutObjectAcl"
+        ]
+        Resource = "${aws_s3_bucket.assets.arn}/*"
+      }
+    ]
+  })
+}
+
+# Generate Access Keys for the developer user
+resource "aws_iam_access_key" "bedrock_dev_key" {
+  user = aws_iam_user.bedrock_dev_view.name
+}
+
+# Map IAM user to Kubernetes RBAC view role
+resource "aws_eks_access_entry" "bedrock_dev" {
+  cluster_name      = module.eks.cluster_name
+  principal_arn     = aws_iam_user.bedrock_dev_view.arn
+  kubernetes_groups = []
+  type              = "STANDARD"
+}
+
+resource "aws_eks_access_policy_association" "bedrock_dev_view" {
+  cluster_name       = module.eks.cluster_name
+  policy_arn         = "arn:aws:eks::aws:cluster-access-policy/AmazonEKSViewPolicy"
+  principal_arn      = aws_iam_user.bedrock_dev_view.arn
+  access_scope {
+    type = "cluster"
+  }
+}
