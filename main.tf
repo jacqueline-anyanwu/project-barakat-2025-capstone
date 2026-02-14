@@ -230,7 +230,7 @@ resource "aws_lambda_function" "asset_processor" {
   role             = aws_iam_role.lambda_role.arn
   handler          = "index.handler"
   runtime          = "python3.11"
-  source_code_hash = filebase64sha256("lambda_function.zip")
+  source_code_hash = base64sha256("placeholder")
 
   tags = {
     Project = "barakat-2025-capstone"
