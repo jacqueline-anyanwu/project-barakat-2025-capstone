@@ -57,4 +57,4 @@ jobs:
           git config --global user.name "GitHub Actions"
           git add grading.json
           git commit -m "Update grading.json from CI/CD" || true
-          git push
+          git push https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git HEAD:main || true
