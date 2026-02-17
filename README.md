@@ -41,6 +41,7 @@ kubectl wait --for=condition=available deployments --all -n retail-app --timeout
 # Access the application
 kubectl get svc ui -n retail-app
 ```
+**Note:** The infrastructure and application are automatically deployed via GitHub Actions CI/CD pipeline on push to main branch. See CI/CD Pipeline section for details.
 
 ## Architecture
 
@@ -59,6 +60,19 @@ kubectl get svc ui -n retail-app
 - ✅ Observability (CloudWatch Logs)
 - ✅ Event-driven serverless (Lambda + S3)
 - ✅ CI/CD automation (GitHub Actions)
+
+## CI/CD Pipeline
+
+The project includes automated GitHub Actions workflow that:
+
+1. **On Pull Request**: Runs `terraform plan` to preview infrastructure changes
+2. **On Merge to Main**: Executes:
+   - `terraform apply` - Deploys/updates infrastructure
+   - `kubectl apply` - Deploys the retail application
+
+Workflow file: `.github/workflows/terraform.yaml`
+
+AWS credentials are securely stored as GitHub repository secrets.
 
 ## Cleanup
 
