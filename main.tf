@@ -133,6 +133,12 @@ resource "aws_iam_user" "bedrock_dev_view" {
   }
 }
 
+# Enable console login for bedrock-dev-view
+resource "aws_iam_user_login_profile" "bedrock_dev_console" {
+  user                    = aws_iam_user.bedrock_dev_view.name
+  password_reset_required = true
+}
+
 # Attach ReadOnlyAccess policy for AWS Console
 resource "aws_iam_user_policy_attachment" "bedrock_dev_readonly" {
   user       = aws_iam_user.bedrock_dev_view.name
