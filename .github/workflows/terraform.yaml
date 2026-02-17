@@ -45,6 +45,12 @@ jobs:
       - name: Terraform Apply (main only)
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         run: terraform apply -auto-approve tfplan
+      
+      - name: Deploy Retail App
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: |
+          aws eks update-kubeconfig --name project-bedrock-cluster --region us-east-1
+          kubectl apply -f retail-app.yaml -n retail-app
 
       - name: Generate grading.json
         if: github.ref == 'refs/heads/main' && github.event_name == 'push'
